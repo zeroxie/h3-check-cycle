@@ -85,11 +85,13 @@ function getFileName(filePath) {
 /**
  * 获取重构建议
  * @param {*} complexity
+ * @param {*} warning
+ * @param {*} danger
  */
-function getAdvice(complexity) {
-    if (complexity > 10) {
+function getAdvice(complexity,warning,danger) {
+    if (complexity > danger) {
         return "强烈建议"
-    } else if (complexity > 5) {
+    } else if (complexity > warning) {
         return "建议"
     } else {
         return "无需"
@@ -99,7 +101,10 @@ function getAdvice(complexity) {
 /**
  * 获取单个文件的复杂度
  */
-function executeOnFiles(paths, min) {
+function executeOnFiles(paths, param) {
+    const  { warning=10,danger=20,show='w'} = param || {};
+    const textMap = { 'w' : 'warning', 'd': 'danger','warning': 'warning', 'danger': 'danger'}
+    const valMap = {warning, danger}
     const reports = cli.executeOnFiles(paths).results
     const result = []
     let normalCount = 0
@@ -116,20 +121,20 @@ function executeOnFiles(paths, min) {
                 const complexity = getComplexity(message)
                 try {
                     switch (true) {
-                        case complexity <= 5:
+                        case complexity <= warning:
                             normalCount++
                             break
-                        case 5 < complexity && complexity <= 10:
+                        case warning < complexity && complexity <= danger:
                             slightCount++
                             break
-                        case complexity > 10:
+                        case complexity > danger:
                             seriousCount++
                             break
                     }
                 } catch (error) {
-                    console.log("err", error)
+                    console.log("err", error);
                 }
-
+                let min = valMap[textMap[show]];
                 if (complexity >= min) {
                     result.push({
                         funcType: getFunctionType(message),
@@ -137,7 +142,7 @@ function executeOnFiles(paths, min) {
                         position: line + "," + column,
                         fileName: getFileName(filePath),
                         complexity,
-                        advice: getAdvice(complexity)
+                        advice: getAdvice(complexity,warning,danger)
                     })
                 }
             }
@@ -172,9 +177,9 @@ function getFiles() {
 }
 module.exports = async function(param) {
     // options is optional
-    const { min = 1 } = param || {}
+    // const { min = 1 } = param || {}
+    // todo 这里做个参数检验
+    let files = await getFiles();
 
-    let files = await getFiles()
-
-    return executeOnFiles(files, min)
+    return executeOnFiles(files, param)
 }

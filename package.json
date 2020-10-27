@@ -1,6 +1,6 @@
 {
-  "name": "check-cycle-complexity",
-  "version": "1.0.3",
+  "name": "h3-check-cycle",
+  "version": "1.0.4",
   "description": "check code cycle complexity",
   "main": "./bin/index.js",
   "bin": {
@@ -15,7 +15,9 @@
     "table": "^5.4.6",
     "yargs": "^15.0.2"
   },
-  "devDependencies": {},
+  "devDependencies": {
+    "node-xlsx": "^0.15.0"
+  },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
